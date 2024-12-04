@@ -6,15 +6,27 @@ data class Report(val levels: List<Int>)
 
 fun main() {
     val reports = parse()
-    val safe = reports.count { isSafe(it) }
+    val safe = reports.count { isSafe(it.levels) }
     println("Safe reports: $safe")
+
+    val safe2 = reports.count { isSafeWithDampener(it) }
+    println("Safe reports with dampener: $safe2")
+}
+
+private fun isSafeWithDampener(report: Report): Boolean {
+    return report.levels.indices.any { removedIndex ->
+        val partialLevels = report.levels.filterIndexed { index, _ ->
+            index != removedIndex
+        }
+        isSafe(partialLevels)
+    }
 }
 
 
-fun isSafe(report: Report): Boolean {
+private fun isSafe(levels: List<Int>): Boolean {
     var increase = false
     var decrease = false
-    report.levels.zipWithNext().forEach { pair ->
+    levels.zipWithNext().forEach { pair ->
         if (pair.first == pair.second) {
             return false
         }
