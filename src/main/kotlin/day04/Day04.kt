@@ -4,23 +4,28 @@ val XMAS = "XMAS"
 fun main() {
     val lines = input.trim().lines()
     val directions = listOf(-1, 0, 1)
-    var count = 0
+    var xmasCount = 0
+    var masCount = 0
     lines.forEachIndexed { y, line ->
         line.forEachIndexed { x, c ->
             directions.forEach { dy ->
                 directions.forEach { dx ->
                     if (isXmas(x, y, dx, dy, 0, lines)) {
-                        count++
+                        xmasCount++
+                    }
+                    if (dx != 0 && dy != 0 && isX_Mas(x, y, dx, dy, lines)) {
+                        masCount++
                     }
                 }
             }
         }
     }
-    println(count)
+    println("XMAS: $xmasCount")
+    println("MAS: $masCount")
 }
 
 fun isXmas(x: Int, y: Int, dx: Int, dy: Int, i: Int, lines: List<String>): Boolean {
-    val actual = lines.getOrNull(y)?.getOrNull(x)
+    val actual = getChar(lines, y, x)
     val expected = XMAS.get(i)
     return if (actual != expected) {
         false
@@ -31,6 +36,19 @@ fun isXmas(x: Int, y: Int, dx: Int, dy: Int, i: Int, lines: List<String>): Boole
     }
 }
 
+fun isX_Mas(x: Int, y: Int, d1: Int, d2: Int, lines: List<String>): Boolean {
+    return isMas(x, y, d1, d1, lines) && isMas(x, y, d2, -d2, lines)
+}
+
+fun isMas(x: Int, y: Int, dx: Int, dy: Int, lines: List<String>): Boolean {
+    val c1 = getChar(lines, x - dx, y - dy)
+    val c2 = getChar(lines, x , y )
+    val c3 = getChar(lines, x + dx, y + dy)
+    return "$c1$c2$c3" == "MAS"
+}
+
+private fun getChar(lines: List<String>, x: Int, y: Int) =
+    lines.getOrNull(y)?.getOrNull(x)
 
 val input = """
 MXXMASAMXSAMXSXMAMXXAMXASAXASMSMXAAMAMXXMMXAMXSXMAMSAMSAMMXASXXXXMXSXMSMSXSMSMMSSMMXSAMXSSSSXXXMMSSSMMXMAMXAXAMXMSMSSSMMSASMXSXAAXMSSMXXXSXS
