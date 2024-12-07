@@ -5,9 +5,31 @@ data class Rule(val x: Int, val y: Int)
 fun main() {
     val rules = parseRules(input)
     val updates = parseUpdates(input)
-    val valid = updates.filter { isValid(it, rules) }
-    val sumMiddle = valid.map { it[it.size / 2] }.sum()
+
+//    val valid = updates.filter { isValid(it, rules) }
+
+    val invalid = updates.filter { !isValid(it, rules) }
+    val fixed = invalid.map { fixUpdate(it, rules) }
+
+    val sumMiddle = fixed.map { it[it.size / 2] }.sum()
     println(sumMiddle)
+}
+
+fun fixUpdate(update: List<Int>, rules: List<Rule>): List<Int> {
+    return update.sortedWith { i1, i2 ->
+        val rule = findRule(rules, i1, i2)
+        if (rule == null) {
+            0
+        }else if (rule.x == i1) {
+            -1
+        }else {
+            1
+        }
+    }
+}
+
+fun findRule(rules: List<Rule>, i1: Int, i2: Int): Rule? {
+    return rules.find { (it.x == i1 && it.y == i2) || (it.x == i2 && it.y == i1) }
 }
 
 fun isValid(update: List<Int>, rules: List<Rule>): Boolean {
