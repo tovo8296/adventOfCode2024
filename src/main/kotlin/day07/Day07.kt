@@ -4,12 +4,14 @@ data class Equation(val result: Long, val values: List<Long>)
 
 enum class Operator {
     PLUS,
-    MULT;
+    MULT,
+    CONCAT;
 
     fun calc(op1: Long, op2: Long): Long {
         return when (this) {
             PLUS -> op1 + op2
             MULT -> op1 * op2
+            CONCAT -> "$op1$op2".toLong()
         }
     }
 }
