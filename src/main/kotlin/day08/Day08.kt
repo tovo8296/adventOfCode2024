@@ -5,7 +5,11 @@ import util.Coord
 fun main() {
     val world = input.lines().map { it.toList() }
     val antennas = findAntennas(world)
-    val antinodes = antennas.values.map { findAntinodes(it, world) }.flatten().toSet()
+    val antinodes = mutableSetOf<Coord>()
+    antennas.values.forEach {
+        val antis = findAntinodes(it, world)
+        antinodes.addAll(antis)
+    }
     println("Antinodes: ${antinodes.size}")
 }
 
@@ -15,8 +19,16 @@ fun findAntinodes(antennas: List<Coord>, world: List<List<Char>>): List<Coord> {
     pairs.forEach { pair ->
         val dx = pair.first.x - pair.second.x
         val dy = pair.first.y - pair.second.y
-        antiNodes.add(Coord(pair.first.x + dx, pair.first.y + dy))
-        antiNodes.add(Coord(pair.second.x - dx, pair.second.y - dy))
+        var coord = pair.first
+        while (coord.isValid(world)) {
+            antiNodes.add(coord)
+            coord = Coord(coord.x + dx, coord.y + dy)
+        }
+        coord = pair.second
+        while (coord.isValid(world)) {
+            antiNodes.add(coord)
+            coord = Coord(coord.x - dx, coord.y - dy)
+        }
     }
     return antiNodes.filter { it.isValid(world) }
 }
