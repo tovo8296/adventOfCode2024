@@ -10,6 +10,12 @@ data class Coord(val x: Int, val y: Int) {
         block(Coord(x + 1, y))
     }
 
+    inline fun forEachStraightNeighbor(block: (coord: Coord) -> Unit) {
+        Direction.straightEntries.forEach { dir ->
+            block(move(dir))
+        }
+    }
+
     fun move(direction: Direction): Coord = Coord(x + direction.dx, y + direction.dy)
 
     fun <T> get(world: List<List<T>>): T? = world.getOrNull(y)?.getOrNull(x)
