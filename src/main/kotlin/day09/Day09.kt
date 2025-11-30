@@ -7,7 +7,8 @@ fun main() {
     val disc = IntArray(diskMap.length * 10) {FREE}
     fillDiscByMap(diskMap, disc)
 //    println("Disc:   ${format(disc)}\n\n")
-    compact(disc)
+//    compact(disc)
+    compactFullFiles(disc)
 //    println("Compact: ${format(disc)}")
     val checksum = calcChecksum(disc)
     println("Checksum: $checksum")
@@ -39,6 +40,44 @@ fun compact(disc: IntArray) {
         freePointer++
         usedPointer--
     }
+}
+
+fun compactFullFiles(disc: IntArray) {
+    var previousPos = disc.size
+    var fileId = disc.max()
+    while(fileId > 0) {
+        val fileEnd = findIndex(disc, previousPos - 1, -1) {it == fileId}
+        val beforeFile = findIndex(disc, fileEnd, -1) {it != fileId}
+        val fileStart = beforeFile + 1
+        val fileLength = fileEnd  - beforeFile
+        val gapStart = findGap(disc, fileLength, beforeFile)
+        if (gapStart != -1) {
+            (0 until fileLength).forEach {
+                disc[gapStart + it] = fileId
+                disc[fileStart + it] = FREE
+            }
+        }
+        fileId--
+        previousPos = fileStart
+    }
+}
+
+fun findGap(disc: IntArray, fileLength: Int, beforeFile: Int): Int {
+    (0 .. beforeFile).forEach {
+        if (hasMatchingGap(disc, it, fileLength)) {
+            return it
+        }
+    }
+    return -1
+}
+
+fun hasMatchingGap(disc: IntArray, start: Int, fileLength: Int): Boolean {
+    (0 until fileLength).forEach {
+        if (disc[start + it] != FREE) {
+            return false
+        }
+    }
+    return true
 }
 
 fun findIndex(array: IntArray, start: Int, step: Int = 1, predicate: (Int) -> Boolean): Int {
