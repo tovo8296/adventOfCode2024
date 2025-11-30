@@ -8,7 +8,7 @@ fun main() {
     map.forEachIndexed { y, line ->
         line.forEachIndexed { x, height ->
             if (height == 0) {
-                val score = calculateTrailHeadScore(map, Coord(x, y))
+                val score = calculateTrailHeadScore(map, Coord(x, y), false)
                 scoreSum += score
             }
         }
@@ -16,13 +16,13 @@ fun main() {
     println("Score Sum: $scoreSum")
 }
 
-fun calculateTrailHeadScore(map: List<List<Int>>, coord: Coord): Int {
-    val foundSummits = mutableSetOf<Coord>()
+fun calculateTrailHeadScore(map: List<List<Int>>, coord: Coord, distinct: Boolean): Int {
+    val foundSummits = if (distinct) mutableSetOf<Coord>() else mutableListOf<Coord>()
     findSummits(map, coord, 0, foundSummits)
     return foundSummits.size
 }
 
-fun findSummits(map: List<List<Int>>, coord: Coord, height: Int, foundSummits: MutableSet<Coord>) {
+fun findSummits(map: List<List<Int>>, coord: Coord, height: Int, foundSummits: MutableCollection<Coord>) {
     coord.forEachStraightNeighbor { next ->
         if (next.isValid(map)) {
             val nextHeight = next.get(map)
