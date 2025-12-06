@@ -20,6 +20,8 @@ data class Coord(val x: Int, val y: Int) {
 
     fun <T> get(world: List<List<T>>): T? = world.getOrNull(y)?.getOrNull(x)
 
+    fun <T> set(world: List<MutableList<T>>, value: T) = world.get(y).set(x, value)
+
     fun isValid(world: List<List<Any>>): Boolean {
         return x >= 0 && y >= 0 && y < world.size && x < world[y].size
     }
