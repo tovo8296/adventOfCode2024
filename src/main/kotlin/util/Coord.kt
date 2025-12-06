@@ -1,5 +1,7 @@
 package util
 
+import java.util.Comparator
+
 data class Coord(val x: Int, val y: Int) {
     inline fun forEachAdjacent(block: (coord: Coord) -> Unit) {
         (x - 1..x + 1).forEach { i ->
@@ -28,3 +30,21 @@ data class Coord(val x: Int, val y: Int) {
 }
 
 data class Coord3D(val x: Int, val y: Int, val z: Int)
+
+class CoordComparator(val linesFirst: Boolean): Comparator<Coord> {
+    override fun compare(c1: Coord?, c2: Coord?): Int {
+        if (c1 ==  null && c2 == null) {
+            return 0
+        }else if (c1 == null) {
+            return 1
+        }else if (c2 == null) {
+            return -1
+        }
+        val xd = c1.x - c2.x
+        val yd = c1.y - c2.y
+        val d1 = if(linesFirst) yd else xd
+        val d2 = if(linesFirst) xd else yd
+        return if (d1 != 0) d1 else d2
+    }
+
+}

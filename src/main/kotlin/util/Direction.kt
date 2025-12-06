@@ -38,4 +38,10 @@ enum class Direction(val dx: Int, val dy: Int) {
         SE -> NE
         NE -> NW
     }
+
+    val vertical: Boolean
+        get() = this == N || this == S
+
+    val horizontal: Boolean
+        get() = this == W || this == E
 }

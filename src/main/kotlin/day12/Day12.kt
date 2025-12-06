@@ -1,25 +1,73 @@
 package day12
 
 import util.Coord
+import util.CoordComparator
+import util.Direction
 
 val Done = '.'
 val InProgress = '*'
 
+data class Fence(val coord: Coord, val direction: Direction)
+
+class FenceComparator(val coordComparator: Comparator<Coord>) : Comparator<Fence> {
+    override fun compare(f1: Fence?, f2: Fence?): Int {
+        if (f1 == null && f2 == null) {
+            return 0
+        } else if (f1 == null) {
+            return 1
+        } else if (f2 == null) {
+            return -1
+        }
+        val deltaDir = f1.direction.ordinal - f2.direction.ordinal
+        if (deltaDir != 0) {
+            return deltaDir
+        }
+        return coordComparator.compare(f1.coord, f2.coord)
+    }
+}
+
 fun main() {
     val map = input.lines().toMutableList().map { it.toMutableList() }
 
-    var sum = 0
+    var simpleSum = 0
+    var bulkSum = 0
     map.forEachIndexed { y, line ->
         line.forEachIndexed { x, c ->
             if (c != Done) {
-                val result = handleArea(map, Coord(x, y,), c)
-//                println("At $x/$y with type $c: area: ${result.first}, fence: ${result.second}")
-                sum += result.first * result.second
+                val result = handleArea(map, Coord(x, y), c)
+                simpleSum += result.first * result.second.size
+                val sides = calcFenceSides(result.second)
+                bulkSum += result.first * sides
+//                println("At $x/$y with type $c: area: ${result.first}, sides: $sides, fences: ${result.second}")
                 finishInProgress(map)
             }
         }
     }
-    println("Cost sum: $sum")
+    println("Cost sum simple: $simpleSum") // 1489582
+    println("Cost sum bulk: $bulkSum")
+}
+
+fun calcFenceSides(fences: List<Fence>): Int {
+    val sortedLines = fences.sortedWith(FenceComparator(CoordComparator(true))).filter { it.direction.vertical }
+    var sides = 1
+    var previous: Fence = sortedLines.first()
+    sortedLines.drop(1).forEach { fence ->
+        if (previous.direction != fence.direction || previous.coord.y != fence.coord.y || previous.coord.x + 1 != fence.coord.x) {
+            sides++
+        }
+        previous = fence
+    }
+
+    val sortedColumns = fences.sortedWith(FenceComparator(CoordComparator(false))).filter { it.direction.horizontal }
+    previous = sortedColumns.first()
+    sides++
+    sortedColumns.drop(1).forEach { fence ->
+        if (previous.direction != fence.direction || previous.coord.y + 1 != fence.coord.y || previous.coord.x != fence.coord.x) {
+            sides++
+        }
+        previous = fence
+    }
+    return sides
 }
 
 fun finishInProgress(map: List<MutableList<Char>>) {
@@ -32,27 +80,28 @@ fun finishInProgress(map: List<MutableList<Char>>) {
     }
 }
 
-fun handleArea(map: List<MutableList<Char>>, coord: Coord, c: Char): Pair<Int, Int> {
+fun handleArea(map: List<MutableList<Char>>, coord: Coord, c: Char): Pair<Int, List<Fence>> {
     coord.set(map, InProgress)
     var area = 1
-    var perimeter = 0
-    coord.forEachStraightNeighbor { neighborCoord ->
+    val fences = mutableListOf<Fence>()
+    Direction.straightEntries.forEach { dir ->
+        val neighborCoord = coord.move(dir)
         if (neighborCoord.isValid(map)) {
             val neighborValue = neighborCoord.get(map)
             if (neighborValue != InProgress) {
                 if (neighborValue == c) {
                     val neighborResult = handleArea(map, neighborCoord, c)
                     area += neighborResult.first
-                    perimeter += neighborResult.second
+                    fences.addAll(neighborResult.second)
                 } else {
-                    perimeter++
+                    fences.add(Fence(coord, dir))
                 }
             }
         } else {
-            perimeter++
+            fences.add(Fence(coord, dir))
         }
     }
-    return Pair(area, perimeter)
+    return Pair(area, fences)
 }
 
 val test1 = """
